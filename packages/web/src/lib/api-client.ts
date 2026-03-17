@@ -103,6 +103,136 @@ export const authApi = {
   },
 };
 
+// ─── Anime Types ──────────────────────────────────────────────────────────────
+
+export interface AnimeTitle {
+  romaji: string | null;
+  english: string | null;
+  native: string | null;
+}
+
+export interface AnimeCoverImage {
+  extraLarge?: string | null;
+  large: string | null;
+  medium: string | null;
+}
+
+export interface AnimePageInfo {
+  total: number;
+  currentPage: number;
+  lastPage: number;
+  hasNextPage: boolean;
+}
+
+export interface AnimeListItem {
+  id: number;
+  title: AnimeTitle;
+  coverImage: AnimeCoverImage;
+  bannerImage: string | null;
+  genres: string[];
+  averageScore: number | null;
+  popularity: number;
+  episodes: number | null;
+  status: string;
+  season: string | null;
+  seasonYear: number | null;
+  format: string | null;
+  description: string | null;
+}
+
+export interface AnimeCharacter {
+  id: number;
+  name: { full: string };
+  image: { medium: string | null };
+}
+
+export interface AnimeStudio {
+  id: number;
+  name: string;
+}
+
+export interface AnimeStreamingEpisode {
+  title: string;
+  thumbnail: string;
+  url: string;
+  site: string;
+}
+
+export interface AnimeTag {
+  name: string;
+  rank: number;
+  isMediaSpoiler: boolean;
+}
+
+export interface AnimeRanking {
+  rank: number;
+  type: string;
+  context: string;
+  allTime: boolean;
+  season: string | null;
+  year: number | null;
+}
+
+export interface AnimeDetail extends AnimeListItem {
+  meanScore: number | null;
+  trending: number;
+  duration: number | null;
+  source: string | null;
+  tags: AnimeTag[];
+  studios: { nodes: AnimeStudio[] };
+  characters: { nodes: AnimeCharacter[] };
+  relations: { nodes: (AnimeListItem & { type: string })[] };
+  streamingEpisodes: AnimeStreamingEpisode[];
+  trailer: { id: string; site: string } | null;
+  startDate: { year: number | null; month: number | null; day: number | null };
+  endDate: { year: number | null; month: number | null; day: number | null };
+  nextAiringEpisode: { airingAt: number; episode: number } | null;
+  rankings: AnimeRanking[];
+}
+
+export interface PaginatedAnime {
+  pageInfo: AnimePageInfo;
+  results: AnimeListItem[];
+  meta?: { season: string; year: number };
+}
+
+// ─── Anime API ────────────────────────────────────────────────────────────────
+
+export const animeApi = {
+  search(params: {
+    q?: string;
+    genre?: string;
+    format?: string;
+    year?: number;
+    sort?: string;
+    page?: number;
+    perPage?: number;
+  }): Promise<PaginatedAnime> {
+    const qs = new URLSearchParams();
+    if (params.q) qs.set('q', params.q);
+    if (params.genre) qs.set('genre', params.genre);
+    if (params.format) qs.set('format', params.format);
+    if (params.year) qs.set('year', String(params.year));
+    if (params.sort) qs.set('sort', params.sort);
+    if (params.page) qs.set('page', String(params.page));
+    if (params.perPage) qs.set('perPage', String(params.perPage));
+    const query = qs.toString();
+    return request(`/anime${query ? `?${query}` : ''}`);
+  },
+
+  trending(page = 1, perPage = 20): Promise<PaginatedAnime> {
+    return request(`/anime/trending?page=${page}&perPage=${perPage}`);
+  },
+
+  seasonal(page = 1, perPage = 20): Promise<PaginatedAnime> {
+    return request(`/anime/seasonal?page=${page}&perPage=${perPage}`);
+  },
+
+  getById(id: number): Promise<AnimeDetail> {
+    return request(`/anime/${id}`);
+  },
+};
+
 // ─── Users API ────────────────────────────────────────────────────────────────
 
 export const usersApi = {

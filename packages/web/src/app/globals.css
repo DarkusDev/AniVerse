@@ -45,3 +45,8 @@
     box-shadow: 0 0 40px rgba(124, 58, 237, 0.35);
   }
 }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}

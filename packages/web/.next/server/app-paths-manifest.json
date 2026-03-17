@@ -1,1 +1,7 @@
-{}
+{
+  "/login/page": "app/login/page.js",
+  "/page": "app/page.js",
+  "/anime/[id]/page": "app/anime/[id]/page.js",
+  "/profile/page": "app/profile/page.js",
+  "/explore/page": "app/explore/page.js"
+}

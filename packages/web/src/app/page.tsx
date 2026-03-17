@@ -1,8 +1,12 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import AniVerseLogo from '@/components/AniVerseLogo';
+import AnimeCard from '@/components/anime/AnimeCard';
+import AnimeCardSkeleton from '@/components/anime/AnimeCardSkeleton';
 import { useAuth } from '@/contexts/AuthContext';
+import { animeApi, type AnimeListItem } from '@/lib/api-client';
 
 const FEATURES = [
   {
@@ -22,8 +26,57 @@ const FEATURES = [
   },
 ] as const;
 
+function AnimeRow({
+  title,
+  items,
+  loading,
+}: {
+  title: string;
+  items: AnimeListItem[];
+  loading: boolean;
+}): React.JSX.Element {
+  return (
+    <section className="relative z-10 px-6 pb-10 md:px-12">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-5 flex items-center justify-between">
+          <h2 className="text-xl font-extrabold text-white">{title}</h2>
+          <Link
+            href="/explore"
+            className="text-xs font-medium text-brand-light hover:text-white transition-colors"
+          >
+            Ver todo →
+          </Link>
+        </div>
+        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8">
+          {loading
+            ? Array.from({ length: 8 }).map((_, i) => <AnimeCardSkeleton key={i} />)
+            : items.slice(0, 8).map((a) => <AnimeCard key={a.id} anime={a} />)}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function HomePage(): React.JSX.Element {
   const { user } = useAuth();
+  const [trending, setTrending] = useState<AnimeListItem[]>([]);
+  const [seasonal, setSeasonal] = useState<AnimeListItem[]>([]);
+  const [trendingLoading, setTrendingLoading] = useState(true);
+  const [seasonalLoading, setSeasonalLoading] = useState(true);
+
+  useEffect(() => {
+    animeApi
+      .trending(1, 8)
+      .then((d) => setTrending(d.results))
+      .catch(() => undefined)
+      .finally(() => setTrendingLoading(false));
+
+    animeApi
+      .seasonal(1, 8)
+      .then((d) => setSeasonal(d.results))
+      .catch(() => undefined)
+      .finally(() => setSeasonalLoading(false));
+  }, []);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-surface flex flex-col">
@@ -41,10 +94,16 @@ export default function HomePage(): React.JSX.Element {
           <span className="font-bold text-lg tracking-tight text-white">AniVerse</span>
         </div>
         <nav className="flex items-center gap-3">
+          <Link
+            href="/explore"
+            className="text-sm font-medium text-gray-400 transition-colors hover:text-white"
+          >
+            Explorar
+          </Link>
           {user ? (
             <Link
               href="/profile"
-              className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-brand-light glow-brand"
+              className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-brand-light"
             >
               Mi perfil
             </Link>
@@ -58,7 +117,7 @@ export default function HomePage(): React.JSX.Element {
               </Link>
               <Link
                 href="/register"
-                className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-brand-light glow-brand"
+                className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-brand-light"
               >
                 Registrarse
               </Link>
@@ -68,7 +127,7 @@ export default function HomePage(): React.JSX.Element {
       </header>
 
       {/* Hero */}
-      <section className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 py-20 text-center">
+      <section className="relative z-10 flex flex-col items-center justify-center px-6 py-20 text-center">
         {/* Logo */}
         <div className="animate-float mb-8">
           <AniVerseLogo size={120} />
@@ -95,8 +154,8 @@ export default function HomePage(): React.JSX.Element {
 
         {/* CTAs */}
         <div className="flex flex-col items-center gap-3 sm:flex-row">
-          <a
-            href="#"
+          <Link
+            href="/explore"
             className="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-violet-600 via-pink-600 to-orange-500 px-8 py-3.5 text-sm font-bold text-white shadow-lg transition-all hover:scale-[1.03] hover:shadow-brand/40 hover:shadow-xl"
           >
             Explorar ahora
@@ -109,13 +168,15 @@ export default function HomePage(): React.JSX.Element {
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
-          </a>
-          <a
-            href="#"
-            className="inline-flex items-center gap-2 rounded-xl border border-surface-border bg-surface-elevated px-8 py-3.5 text-sm font-semibold text-gray-300 transition-all hover:border-brand/40 hover:text-white"
-          >
-            Ver demo
-          </a>
+          </Link>
+          {!user && (
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-2 rounded-xl border border-surface-border bg-surface-elevated px-8 py-3.5 text-sm font-semibold text-gray-300 transition-all hover:border-brand/40 hover:text-white"
+            >
+              Crear cuenta gratis
+            </Link>
+          )}
         </div>
 
         {/* Stats */}
@@ -133,8 +194,14 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </section>
 
+      {/* Trending */}
+      <AnimeRow title="En tendencia" items={trending} loading={trendingLoading} />
+
+      {/* Seasonal */}
+      <AnimeRow title="Esta temporada" items={seasonal} loading={seasonalLoading} />
+
       {/* Features */}
-      <section className="relative z-10 px-6 pb-24 md:px-12">
+      <section className="relative z-10 px-6 py-16 md:px-12">
         <div className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-3">
           {FEATURES.map(({ icon, title, description }) => (
             <div
