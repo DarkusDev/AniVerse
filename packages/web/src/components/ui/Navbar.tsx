@@ -35,6 +35,8 @@ export default function Navbar(): React.JSX.Element {
         {/* Nav links */}
         <nav className="hidden items-center gap-6 md:flex">
           {navLink('/explore', 'Explorar')}
+          {user && navLink('/my-list', 'Mi Lista')}
+          {user && navLink('/import', 'Importar')}
         </nav>
 
         {/* Auth */}

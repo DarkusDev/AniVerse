@@ -7,6 +7,9 @@ import { RedisModule } from './common/redis/redis.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { AnimeModule } from './anime/anime.module';
+import { ListsModule } from './lists/lists.module';
+import { CustomListsModule } from './custom-lists/custom-lists.module';
+import { ImportModule } from './import/import.module';
 
 @Module({
   imports: [
@@ -16,6 +19,9 @@ import { AnimeModule } from './anime/anime.module';
     AuthModule,
     UsersModule,
     AnimeModule,
+    ListsModule,
+    CustomListsModule,
+    ImportModule,
   ],
   controllers: [AppController],
   providers: [AppService],

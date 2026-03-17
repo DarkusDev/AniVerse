@@ -233,6 +233,140 @@ export const animeApi = {
   },
 };
 
+// ─── List Types ───────────────────────────────────────────────────────────────
+
+export type AnimeUserStatus = 'WATCHING' | 'COMPLETED' | 'PLANNED' | 'DROPPED' | 'PAUSED';
+
+export interface AnimeCacheSummary {
+  titleRomaji: string | null;
+  titleEnglish: string | null;
+  coverImage: string | null;
+  format: string | null;
+  episodes: number | null;
+  status: string | null;
+  season: string | null;
+  seasonYear: number | null;
+  genres: string[];
+  averageScore: number | null;
+}
+
+export interface ListEntry {
+  id: string;
+  animeId: number;
+  status: AnimeUserStatus;
+  score: number | null;
+  episodesWatched: number;
+  totalEpisodes: number | null;
+  startDate: string | null;
+  finishDate: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  anime: AnimeCacheSummary | null;
+}
+
+export interface PaginatedList {
+  results: ListEntry[];
+  total: number;
+  page: number;
+  perPage: number;
+  lastPage: number;
+}
+
+// ─── Lists API ────────────────────────────────────────────────────────────────
+
+export const listsApi = {
+  getMyList(params?: {
+    status?: AnimeUserStatus;
+    page?: number;
+    perPage?: number;
+  }): Promise<PaginatedList> {
+    const qs = new URLSearchParams();
+    if (params?.status) qs.set('status', params.status);
+    if (params?.page) qs.set('page', String(params.page));
+    if (params?.perPage) qs.set('perPage', String(params.perPage));
+    const q = qs.toString();
+    return requestAuth(`/lists/me${q ? `?${q}` : ''}`);
+  },
+
+  getEntry(animeId: number): Promise<ListEntry> {
+    return requestAuth(`/lists/me/${animeId}`);
+  },
+
+  createEntry(data: {
+    animeId: number;
+    status: AnimeUserStatus;
+    score?: number;
+    episodesWatched?: number;
+    totalEpisodes?: number;
+    notes?: string;
+  }): Promise<ListEntry> {
+    return requestAuth('/lists/me', { method: 'POST', body: JSON.stringify(data) });
+  },
+
+  updateEntry(
+    animeId: number,
+    data: {
+      status?: AnimeUserStatus;
+      score?: number;
+      episodesWatched?: number;
+      totalEpisodes?: number;
+      notes?: string;
+    },
+  ): Promise<ListEntry> {
+    return requestAuth(`/lists/me/${animeId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteEntry(animeId: number): Promise<void> {
+    return requestAuth(`/lists/me/${animeId}`, { method: 'DELETE' });
+  },
+};
+
+// ─── Import API ───────────────────────────────────────────────────────────────
+
+export type ImportSource = 'mal' | 'anilist';
+export type JobStatus = 'pending' | 'fetching' | 'importing' | 'done' | 'error';
+
+export interface ImportJob {
+  id: string;
+  source: ImportSource;
+  username: string;
+  status: JobStatus;
+  total: number;
+  processed: number;
+  imported: number;
+  updated: number;
+  skipped: number;
+  errors: number;
+  message: string;
+  errorMessage?: string;
+  startedAt: string;
+  completedAt?: string;
+}
+
+export const importApi = {
+  startMal(username: string): Promise<{ jobId: string }> {
+    return requestAuth('/import/mal', { method: 'POST', body: JSON.stringify({ username }) });
+  },
+
+  startAniList(username: string): Promise<{ jobId: string }> {
+    return requestAuth('/import/anilist', { method: 'POST', body: JSON.stringify({ username }) });
+  },
+
+  /** Polling fallback — use SSE (openProgressStream) for real-time updates */
+  getStatus(jobId: string): Promise<ImportJob> {
+    return request(`/import/status/${jobId}`);
+  },
+
+  /** Opens an SSE stream for real-time progress. Returns EventSource. */
+  openProgressStream(jobId: string): EventSource {
+    return new EventSource(`${API_BASE}/import/progress/${jobId}`);
+  },
+};
+
 // ─── Users API ────────────────────────────────────────────────────────────────
 
 export const usersApi = {

@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '@/components/ui/Navbar';
+import ListAddButton from '@/components/anime/ListAddButton';
 import { animeApi, type AnimeDetail } from '@/lib/api-client';
 import {
   cleanDescription,
@@ -185,6 +186,14 @@ export default function AnimeDetailPage(): React.JSX.Element {
                 ))}
               </div>
             )}
+
+            {/* Add to list */}
+            <div className="mt-5">
+              <ListAddButton
+                animeId={anime.id}
+                totalEpisodes={anime.episodes}
+              />
+            </div>
           </div>
         </div>
 

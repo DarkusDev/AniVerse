@@ -41,6 +41,44 @@ export const SEASON_LABELS: Record<string, string> = {
   FALL: 'Otoño',
 };
 
+export const LIST_STATUSES = ['WATCHING', 'COMPLETED', 'PLANNED', 'PAUSED', 'DROPPED'] as const;
+
+export const LIST_STATUS_CONFIG: Record<
+  string,
+  { label: string; color: string; bg: string; icon: string }
+> = {
+  WATCHING: {
+    label: 'Viendo',
+    color: 'text-blue-400',
+    bg: 'bg-blue-500/20 border border-blue-500/30',
+    icon: '▶',
+  },
+  COMPLETED: {
+    label: 'Completado',
+    color: 'text-green-400',
+    bg: 'bg-green-500/20 border border-green-500/30',
+    icon: '✓',
+  },
+  PLANNED: {
+    label: 'Planeado',
+    color: 'text-gray-400',
+    bg: 'bg-gray-500/20 border border-gray-500/30',
+    icon: '◷',
+  },
+  PAUSED: {
+    label: 'En pausa',
+    color: 'text-yellow-400',
+    bg: 'bg-yellow-500/20 border border-yellow-500/30',
+    icon: '⏸',
+  },
+  DROPPED: {
+    label: 'Abandonado',
+    color: 'text-red-400',
+    bg: 'bg-red-500/20 border border-red-500/30',
+    icon: '✕',
+  },
+};
+
 export const SORT_OPTIONS = [
   { value: 'POPULARITY', label: 'Popularidad' },
   { value: 'SCORE', label: 'Puntuación' },
