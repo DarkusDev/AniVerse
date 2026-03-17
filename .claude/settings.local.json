@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd:*)",
+      "Bash(where npm:*)",
+      "Read(//usr/local/bin/**)",
+      "Bash(echo:*)",
+      "Bash(npm install:*)",
+      "Bash(npm ls:*)",
+      "Bash(npm query:*)",
+      "Bash(npm show:*)"
+    ]
+  }
+}
